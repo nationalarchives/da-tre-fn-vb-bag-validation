@@ -1,0 +1,65 @@
+# Test; get next version; build image; deploy to ECR; if successful, git tag.
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feature/DTE-473/ecr-build'
+  # Enable manual run; must be in main branch to be available
+  workflow_dispatch:
+permissions:
+  id-token: write  # required by aws-actions/configure-aws-credentials
+  contents: write  # to push new git tag
+jobs:
+  deploy-to-ecr:
+    runs-on: ubuntu-latest
+    env:
+      python_version: '3.9'
+      docker_image_name: 'tre-vb-bag-validation'
+      build_dir: 'tre-vb-bag-validation'
+      ecr_registry_path: tre-v2
+    steps:
+      - name: Diagnostic info
+        run: |
+          printf 'github.event.repository.name=%s\n' "${{ github.event.repository.name }}"
+          printf 'github.api_url=%s\n' "${{ github.api_url }}"
+          printf 'env.python_version=%s\n' "${{ env.python_version }}"
+      - name: Checkout current
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ env.python_version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.python_version }}
+      - name: AWS CodeArtifact login
+        uses: nationalarchives/tre-github-actions/.github/actions/aws-codeartifact-login@feature/DTE-473/add-common-acr-build-actions
+        with:
+          repository: ${{ secrets.AWS_CODESPACE_REPOSITORY_NAME }}
+          domain: ${{ secrets.AWS_CODESPACE_REPOSITORY_DOMAIN }}
+          domain-owner: ${{ secrets.AWS_CODESPACE_REPOSITORY_ACCOUNT }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_OPEN_ID_CONNECT_ROLE_ARN }}
+      - name: Run tests
+        run: |
+          python --version
+          cd ${{ env.build_dir }}
+          python -m unittest discover ./tests -p 'test_*.py'
+      - name: Get the version to use to tag this build
+        id: build-tag
+        uses: nationalarchives/tre-github-actions/.github/actions/get-next-version@0.0.1
+        with:
+          repo-name: ${{ github.event.repository.name }}
+      - name: Diagnostic info
+        run: |
+          printf 'steps.build-tag.outputs.next-version=%s\n' "${{ steps.build-tag.outputs.next-version }}"
+      - name: Build and push Docker image to AWS ECR
+        uses: nationalarchives/tre-github-actions/.github/actions/docker-build-and-deploy-to-ecr@0.0.1
+        with:
+          dockerfile-dir: ${{ env.build_dir }}
+          image-name: ${{ env.docker_image_name }}
+          image-version: ${{ steps.build-tag.outputs.next-version }}
+          ecr-registry-path: ${{ env.ecr_registry_path }}
+          aws-region: ${{ secrets.aws_region }}
+          role-to-assume: ${{ secrets.AWS_OPEN_ID_CONNECT_ROLE_ARN }}
+      - name: Add Git tag for this build
+        run: |
+          git tag ${{ steps.build-tag.outputs.next-version }}
+          git push origin ${{ steps.build-tag.outputs.next-version }}
