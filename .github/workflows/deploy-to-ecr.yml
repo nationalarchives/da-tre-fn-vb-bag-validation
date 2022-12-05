@@ -40,8 +40,9 @@ jobs:
       - name: Run tests
         run: |
           python --version
-          cd ${{ env.build_dir }}
-          python -m unittest discover ./tests -p 'test_*.py'
+          # Uncomment the following lines if tests are available
+          # cd ${{ env.build_dir }}
+          # python -m unittest discover ./tests -p 'test_*.py'
       - name: Get the version to use to tag this build
         id: build-tag
         uses: nationalarchives/tre-github-actions/.github/actions/get-next-version@0.0.1
