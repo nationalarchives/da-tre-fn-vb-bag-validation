@@ -1,4 +1,5 @@
-# Test; get next version; build image; deploy to ECR; if successful, git tag.
+# Gets next git version tag, builds and deploys Docker image to ECR; if
+# successful, tags git with new version.
 on:
   push:
     branches:
