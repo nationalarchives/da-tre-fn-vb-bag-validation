@@ -10,9 +10,9 @@
 
 Secret for main AWS authentication (using OpenID Connect):
 
-| Name                         | Description                                           |
-| ---------------------------- | ----------------------------------------------------- |
-| AWS_OPEN_ID_CONNECT_ROLE_ARN | Name of AWS role used to authenticate GitHub with AWS |
+| Name                         | Description                                          |
+| ---------------------------- | ---------------------------------------------------- |
+| AWS_OPEN_ID_CONNECT_ROLE_ARN | ARN of AWS role used to authenticate GitHub with AWS |
 
 Other secrets:
 
