@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: ${{ env.python_version }}
       - name: AWS CodeArtifact login
-        uses: nationalarchives/tre-github-actions/.github/actions/aws-codeartifact-login@feature/DTE-473/add-common-acr-build-actions
+        uses: nationalarchives/tre-github-actions/.github/actions/aws-codeartifact-login@feature/DTE-473/add-common-ecr-build-actions
         with:
           repository: ${{ secrets.AWS_CODESPACE_REPOSITORY_NAME }}
           domain: ${{ secrets.AWS_CODESPACE_REPOSITORY_DOMAIN }}
