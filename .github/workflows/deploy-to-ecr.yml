@@ -32,9 +32,9 @@ jobs:
       - name: AWS CodeArtifact login
         uses: nationalarchives/tre-github-actions/.github/actions/aws-codeartifact-login@feature/DTE-473/add-common-ecr-build-actions
         with:
-          repository: ${{ secrets.AWS_CODESPACE_REPOSITORY_NAME }}
-          domain: ${{ secrets.AWS_CODESPACE_REPOSITORY_DOMAIN }}
-          domain-owner: ${{ secrets.AWS_CODESPACE_REPOSITORY_ACCOUNT }}
+          repository: ${{ secrets.AWS_CODEARTIFACT_REPOSITORY_NAME }}
+          domain: ${{ secrets.AWS_CODEARTIFACT_REPOSITORY_DOMAIN }}
+          domain-owner: ${{ secrets.AWS_CODEARTIFACT_REPOSITORY_ACCOUNT }}
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_OPEN_ID_CONNECT_ROLE_ARN }}
       - name: Run tests
