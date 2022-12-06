@@ -1,4 +1,5 @@
 FROM public.ecr.aws/lambda/python:3.9
+ARG PIP_INDEX_URL
 
 # Copy function code
 COPY tre_vb_bag_validation.py ${LAMBDA_TASK_ROOT}
@@ -7,7 +8,9 @@ COPY tre_vb_bag_validation.py ${LAMBDA_TASK_ROOT}
 COPY requirements.txt ./requirements.txt
 RUN  yum -y update \
      && yum clean all \
-     && pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+     && pip install \
+       --requirement requirements.txt \
+       --target "${LAMBDA_TASK_ROOT}"
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
 CMD [ "tre_vb_bag_validation.handler" ]
