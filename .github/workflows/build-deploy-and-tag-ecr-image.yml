@@ -44,6 +44,13 @@ jobs:
       - name: Diagnostic info
         run: |
           printf 'steps.build-tag.outputs.next-version=%s\n' "${{ steps.build-tag.outputs.next-version }}"
+      - name: AWS credential setup
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_OPEN_ID_CONNECT_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          # triggering-actor could differ for re-runs: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+          role-session-name: role-session-name-${{ github.actor }}-${{ github.triggering_actor }}
       - name: Build and push Docker image to AWS ECR
         uses: nationalarchives/tre-github-actions/.github/actions/docker-build-and-deploy-to-ecr@feature/DTE-473/add-common-ecr-build-actions
         with:
@@ -52,7 +59,6 @@ jobs:
           image-version: ${{ steps.build-tag.outputs.next-version }}
           ecr-registry-path: ${{ env.ecr_registry_path }}
           aws-region: ${{ secrets.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_OPEN_ID_CONNECT_ROLE_ARN }}
           aws-codeartifact-repository-name: ${{ secrets.AWS_CODEARTIFACT_REPOSITORY_NAME }}
           aws-codeartifact-repository-domain: ${{ secrets.AWS_CODEARTIFACT_REPOSITORY_DOMAIN }}
           aws-codeartifact-repository-account: ${{ secrets.AWS_CODEARTIFACT_REPOSITORY_ACCOUNT }}
