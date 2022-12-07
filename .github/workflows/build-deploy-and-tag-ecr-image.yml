@@ -52,7 +52,7 @@ jobs:
           # triggering-actor could differ for re-runs: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
           role-session-name: role-session-name-${{ github.actor }}-${{ github.triggering_actor }}
       - name: Build and push Docker image to AWS ECR
-        uses: nationalarchives/tre-github-actions/.github/actions/docker-build-and-deploy-to-ecr@feature/DTE-473/add-common-ecr-build-actions
+        uses: nationalarchives/tre-github-actions/.github/actions/docker-build-and-deploy-to-ecr@0.0.2
         with:
           dockerfile-dir: ${{ env.build_dir }}
           image-name: ${{ env.docker_image_name }}

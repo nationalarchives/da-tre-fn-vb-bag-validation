@@ -1,5 +1,10 @@
 # tre-fn-vb-bag-validation
 
+* [GitHub Actions](#github-actions)
+* [GitHub Action Secrets](#github-action-secrets)
+* [Using 'aws codeartifact login'](#using-aws-codeartifact-login)
+* [Using 'aws codeartifact get-authorization token'](#using-aws-codeartifact-get-authorization-token)
+
 ## GitHub Actions
 
 | Action | Description |
@@ -23,7 +28,7 @@ Other secrets:
 | AWS_CODEARTIFACT_REPOSITORY_ACCOUNT | The AWS account ID that owns the CodeArtifact                            |
 | AWS_REGION                          | The AWS region to use for CodeArtifact and ECR                           |
 
-## Development Environment Setup Steps
+## Using 'aws codeartifact login'
 
 ```bash
 # Create a Python virtual environment
@@ -42,5 +47,56 @@ aws codeartifact login \
 # Install required libraries from AWS codeartifact
 pip install \
   --require-virtualenv \
-  --requirement requirements_aws.txt
+  --requirement requirements.txt
+```
+
+## Using 'aws codeartifact get-authorization token'
+
+Note that environment variable `PIP_INDEX_URL` is passed (using `--build-arg`)
+to the `Dockerfile`, where it is made accessible with `ARG PIP_INDEX_URL`, so
+the `RUN` command's `pip install` process will find and use it:
+
+```bash
+# Get AWS codeartifact authentication token
+CA_AUTH_TOKEN="$( \
+  aws codeartifact get-authorization-token \
+  --duration "${AUTH_TOKEN_DURATION}" \
+  --domain "${CA_DOMAIN}" \
+  --domain-owner "${AWS_ACCOUNT_ID}" \
+  --query authorizationToken \
+  --output text \
+)"
+
+# Create pip access URL:
+export PIP_INDEX_URL=https://${CA_AUTH_USERNAME}:${CA_AUTH_TOKEN}@${CA_DOMAIN}-${AWS_ACCOUNT_ID}.d.codeartifact.${AWS_REGION}.amazonaws.com/pypi/${CA_REPOSITORY_NAME}/simple/"
+```
+
+Example `Dockerfile` using `PIP_INDEX_URL` (gets used by `pip install` command):
+
+```dockerfile
+FROM public.ecr.aws/lambda/python:3.9
+ARG PIP_INDEX_URL
+
+# Copy function code
+COPY tre_vb_bag_validation.py ${LAMBDA_TASK_ROOT}
+
+# Install the function's dependencies using file requirements.txt
+COPY requirements.txt ./requirements.txt
+RUN  yum -y update \
+     && yum clean all \
+     && pip install \
+       --requirement requirements.txt \
+       --target "${LAMBDA_TASK_ROOT}"
+
+# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
+CMD [ "tre_vb_bag_validation.handler" ]
+```
+
+Passing host `PIP_INDEX_URL` environment variable to a `docker build`:
+
+```bash
+docker build \
+  --build-arg PIP_INDEX_URL \
+  --tag "${REGISTRY}/${REGISTRY_PATH}/${IMAGE_NAME}:${IMAGE_VERSION}" \
+  "${DOCKERFILE_DIR}"
 ```
