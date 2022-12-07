@@ -9,7 +9,7 @@
 
 | Action | Description |
 | --- | --- |
-| [`.github/workflows/deploy-to-ecr.yml`](.github/workflows/deploy-to-ecr.yml) | Gets next git version tag<br>Builds and deploys Docker image to ECR<br>If successful, tags git with new version |
+| [`.github/workflows/build-deploy-and-tag-ecr-image.yml`](.github/workflows/build-deploy-and-tag-ecr-image.yml) | Gets next git version tag<br>Builds and deploys Docker image to ECR<br>If successful, tags git with new version |
 
 ## GitHub Action Secrets
 
