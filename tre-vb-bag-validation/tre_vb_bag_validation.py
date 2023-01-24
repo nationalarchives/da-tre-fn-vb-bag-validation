@@ -135,7 +135,8 @@ def handler(event, context):
             process=env_process,
             event_name=EVENT_NAME_OUTPUT_OK,
             prior_event=event,
-            parameters=output_parameter_block)
+            parameters=output_parameter_block,
+            add_uuid=False)
         
         logger.info(f'event_output_ok:\n%s\n', event_output_ok)
         return event_output_ok
